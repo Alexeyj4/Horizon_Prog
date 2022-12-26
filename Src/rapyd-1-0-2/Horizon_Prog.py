@@ -57,15 +57,23 @@ class Horizon_Prog(Frame):
         self._MA41 = Radiobutton(self._Frame7,command=self._set_serial
             ,justify='left',text='Модуль МА-41',value='ma41'
             ,variable=self.device)
-        self._MA41.pack(anchor='w',side='left')
+        self._MA41.pack(anchor='w',side='top')
+        self._Frame32 = Frame(self._Frame2)
+        self._Frame32.pack(fill='x',side='top')
+        self._MA45 = Radiobutton(self._Frame32,command=self._set_serial
+            ,justify='left',text='Модуль МА-45',value='ma45'
+            ,variable=self.device)
+        self._MA45.pack(side='left')
+        self._ma45_treshold_patch = Checkbutton(self._Frame32,justify='left'
+            ,state='disabled',text='MA-45 patch (recomended)'
+            ,variable=self.ma45_treshold_patch)
+        self._ma45_treshold_patch.pack(side='left')
         self._Frame11 = Frame(self._Frame2)
         self._Frame11.pack(fill='x',side='top')
-        self._MA45 = Radiobutton(self._Frame11,command=self._set_serial
-            ,text='Модуль МА-45',value='ma45',variable=self.device)
-        self._MA45.pack(side='left')
-        self._ma45_treshold_patch = Checkbutton(self._Frame11,state='disabled'
-            ,text='MA-45 patch',variable=self.ma45_treshold_patch)
-        self._ma45_treshold_patch.pack(side='left')
+        self._MA48 = Radiobutton(self._Frame11,command=self._set_serial
+            ,justify='left',text='Модуль МА-48',value='ma48'
+            ,variable=self.device)
+        self._MA48.pack(side='left')
         self._Frame12 = Frame(self._Frame2)
         self._Frame12.pack(fill='x',side='top')
         self._LSR4 = Radiobutton(self._Frame12,command=self._set_serial
@@ -94,31 +102,31 @@ class Horizon_Prog(Frame):
             ,command=self._on__GasThreshold_command,state='disabled'
             ,text='Write Gas Threshold')
         self._GasThreshold.pack(side='top')
+        self._Label9 = Label(self._Frame6,text='at addr')
+        self._Label9.pack(side='top')
+        self._ataddr = Entry(self._Frame6,state='disabled'
+            ,textvariable=self.ataddr)
+        self._ataddr.pack(side='top')
+        self._Label5 = Label(self._Frame6,text='phy ipaddr:')
+        self._Label5.pack(side='top')
+        self._phyipaddr = Entry(self._Frame6,state='disabled'
+            ,textvariable=self.phyipaddr)
+        self._phyipaddr.pack(side='top')
+        self._Label6 = Label(self._Frame6,text='eth ipaddr:')
+        self._Label6.pack(side='top')
+        self._ethipaddr = Entry(self._Frame6,state='disabled'
+            ,textvariable=self.ethipaddr)
+        self._ethipaddr.pack(side='top')
+        self._Label7 = Label(self._Frame6,text='phy macaddr:')
+        self._Label7.pack(side='top')
+        self._phymacaddr = Entry(self._Frame6,state='disabled'
+            ,textvariable=self.phymacaddr)
+        self._phymacaddr.pack(side='top')
         self._ethmacaddr = Entry(self._Frame6,state='disabled'
             ,textvariable=self.ethmacaddr)
         self._ethmacaddr.pack(side='bottom')
         self._Label8 = Label(self._Frame6,text='eth macaddr:')
         self._Label8.pack(side='bottom')
-        self._phymacaddr = Entry(self._Frame6,state='disabled'
-            ,textvariable=self.phymacaddr)
-        self._phymacaddr.pack(side='bottom')
-        self._Label7 = Label(self._Frame6,text='phy macaddr:')
-        self._Label7.pack(side='bottom')
-        self._ethipaddr = Entry(self._Frame6,state='disabled'
-            ,textvariable=self.ethipaddr)
-        self._ethipaddr.pack(side='bottom')
-        self._Label6 = Label(self._Frame6,text='eth ipaddr:')
-        self._Label6.pack(side='bottom')
-        self._phyipaddr = Entry(self._Frame6,state='disabled'
-            ,textvariable=self.phyipaddr)
-        self._phyipaddr.pack(side='bottom')
-        self._Label5 = Label(self._Frame6,text='phy ipaddr:')
-        self._Label5.pack(side='bottom')
-        self._ataddr = Entry(self._Frame6,state='disabled'
-            ,textvariable=self.ataddr)
-        self._ataddr.pack(side='bottom')
-        self._Label9 = Label(self._Frame6,text='at addr')
-        self._Label9.pack(side='bottom')
         self._Frame1 = Frame(self._Frame2)
         self._Frame1.pack(side='top')
         self._Label10 = Label(self._Frame1,text='at frequency trim:')
@@ -238,7 +246,7 @@ class Horizon_Prog(Frame):
         self._Frame5.pack(side='left')
         self._left = Button(self._Frame5,command=self._on__left_command
             ,state='disabled',text='<-------(left key)--at trim left')
-        self._left.pack(side='left')
+        self._left.pack(side='right')
         self._Frame13 = Frame(self._Frame10)
         self._Frame13.pack(side='left')
         self._right = Button(self._Frame13,command=self._on__right_command
@@ -430,6 +438,9 @@ class Horizon_Prog(Frame):
         setup_ip_mac_etc()
         ok=1
 
+        if self.device.get()=='ma48': 
+            write_eep('init')  
+
         if write_and_verify('at addr',self.ataddr.get(),'ataddr')==0:            
            ok=0
            mbox.showerror("Ошибка","Ошибка записи at addr")
@@ -457,6 +468,12 @@ class Horizon_Prog(Frame):
         if self.device.get()=='ma45' and self.ma45_treshold_patch.get()==1: 
             write_eep('at thr gas 0x01')   
             write_eep('iwdg rst 3600')               
+
+        if self.device.get()=='ma48': 
+            write_eep('at thr gas 1')   
+            write_eep('iwdg rst 3600') 
+            write_eep('at wdg 1')    
+            write_eep('dbg 0')    
         
         if ok==1:
             self.serial_number.set(str(int(self.serial_number.get())+1))
@@ -489,7 +506,10 @@ class Horizon_Prog(Frame):
             self.serial_number.set('16001')
             
         if self.device.get()=='ma45':
-            self.serial_number.set('16001')         
+            self.serial_number.set('16001')
+            
+        if self.device.get()=='ma48':
+            self.serial_number.set('16001')                     
 
         if self.device.get()=='lsr4':
             self.serial_number.set('1008')
@@ -612,7 +632,7 @@ def setup_ip_mac_etc():
         
         
 
-    if App.device.get()=='ma41' or App.device.get()=='ma45':    
+    if App.device.get()=='ma41' or App.device.get()=='ma45' or App.device.get()=='ma48' :    
         App.ataddr.set(hex(numh()*256+numl()))
         App.phyipaddr.set('10.2.'+str(numh())+'.'+str(numl()))
         App.ethipaddr.set('')
@@ -640,7 +660,7 @@ def setup_ip_mac_etc():
         App.phymacaddr.set('00:11:D8:13:'+hex(numh())[2:]+':'+hex(numl())[2:])
         App.ethmacaddr.set('00:11:D8:14:'+hex(numh())[2:]+':'+hex(numl())[2:])          
         
-    if App.device.get()=='ma45': 
+    if App.device.get()=='ma45' : 
         App._ma45_treshold_patch.config(state="normal")
     else:   
         App._ma45_treshold_patch.config(state="disabled")

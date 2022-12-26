@@ -11,3 +11,4 @@
 11aug2022.14:12 added eeprom at thr gas 1 and eeprom at thr alm 5 for MA41
 18aug2022.17:50 set large font for receiver text window
 22aug2022.17:41 deleted old ma45 threshold patch. Added new ma45 patch
+26dec2022.17:09 added MA-48
