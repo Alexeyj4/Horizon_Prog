@@ -12,3 +12,4 @@
 18aug2022.17:50 set large font for receiver text window
 22aug2022.17:41 deleted old ma45 threshold patch. Added new ma45 patch
 26dec2022.17:09 added MA-48
+28dec2022.13:15 added save last s/n and mode in last.ini file

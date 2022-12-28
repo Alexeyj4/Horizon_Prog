@@ -308,8 +308,8 @@ class Horizon_Prog(Frame):
             
 
         
-        self.device.set('ma41')
-        self.serial_number.set('16001')
+        self.device.set(config.get("LAST", "mode"))
+        self.serial_number.set(config.get("LAST", "serial"))        
         self.ifbw.set(0)
         
 
@@ -480,6 +480,11 @@ class Horizon_Prog(Frame):
             if int(self.serial_number.get())%1000>=255:
                self.serial_number.set(int(self.serial_number.get())+746)
         
+        config.set("LAST", "serial",self.serial_number.get())
+        config.set("LAST", "mode",self.device.get())
+        with open('last.ini', "w") as config_file:
+            config.write(config_file)
+        
         
 
     def _on__right_command(self,Event=None):
@@ -530,6 +535,10 @@ class Horizon_Prog(Frame):
 
 
 pass #---end-of-form---
+
+import configparser
+config = configparser.ConfigParser()
+config.read('last.ini')
 
 connected=0
 COMtimeout=30
